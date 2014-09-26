@@ -41,6 +41,7 @@ Commit the whole:
 ```
 git add sysconf/actual sysconf/gitted-client
 git commit -m "gathered sysconf profiles"
+```
 Done!
 
 
