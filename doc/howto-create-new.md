@@ -63,12 +63,12 @@ lxc-ls -f
 
 You may want to start an interactive shell:
 ```
-lxc-attach -n vm-atlas-base /bin/bash
+lxc-attach -n test-vm /bin/bash
 ```
 
 Everything is okay? Then destroy the container for now:
 ```
-lxc-destroy -f -n vm-atlas-base
+lxc-destroy -f -n test-vm
 ```
 
 ## Setup your custom system in sysconf/actual
