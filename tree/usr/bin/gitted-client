@@ -91,6 +91,7 @@ gitted_command_handle-remote-protocol() {
 
     while [ -n "$1" ]; do
         case "$1" in
+            --tree) gitted_executive_treeish=$2; shift; shift ;;
             -h|--help) gitted_command_help handle-remote-protocol; return ;;
             -*) gitted_eval_common_option "$1"; shift ;;
             *) _argv=("${_argv[@]}" "$1"); shift ;;

@@ -1,0 +1,73 @@
+#!/bin/bash
+#
+# GITTED IMPORT: /local.repository.git <refs/$GITTED_GIT_BRANCH/*> -> LXC container with Gitted state
+#
+# For now, guest are LXC containers only.
+# In the future, it could allow other virtualization technologies.
+#
+# All "$GITTED_GIT_BRANCH/*" branches are scanned and each guest is updated with
+# the new refs. Non-existant guest are created automatically if
+# branch "$GITTED_GIT_BRANCH/{ GUEST }/master" exists.
+#
+#
+
+[ -z "$METAGITTED_EXECUTIVE_BRANCH" ] && METAGITTED_EXECUTIVE_BRANCH=master
+. /usr/share/nef-common/shell-command || exit 2
+
+# git for-each-ref  --format='%(refname)' "refs/heads/${GITTED_GIT_BRANCH}/" | cut -d/ -f4
+guests=$(git for-each-ref --format='%(refname)' "refs/heads/${GITTED_GIT_BRANCH}/" | cut -d/ -f4 | uniq)
+
+for guest in $guests; do
+    nef_log "Processing guest: $guest"
+
+    executive_treeish=$(git show-ref --hash "refs/heads/${GITTED_GIT_BRANCH}/${guest}/${METAGITTED_EXECUTIVE_BRANCH}")
+
+    if [ -z "$executive_treeish" ]; then
+        nef_log "  .. executive branch '$METAGITTED_EXECUTIVE_BRANCH' not present. Ignoring guest."
+    else
+        nef_log "  .. executive branch '$METAGITTED_EXECUTIVE_BRANCH' is $executive_treeish"
+        branches=$(git for-each-ref --format='%(refname)' "refs/heads/${GITTED_GIT_BRANCH}/${guest}/" \
+            | sed -r 's/^([^/]+\/){4}//')
+
+        refspecs=
+        for branch in $branches; do
+            # echo "branch: $branch"
+            refspecs="$refspecs +${GITTED_GIT_BRANCH}/${guest}/$branch:$branch"
+        done
+        nef_log "  .. pushing ref specs: $refspecs"
+
+        git push "ext::/usr/bin/gitted-client handle-remote-protocol --tree $executive_treeish $guest %S" $refspecs
+        [ "$?" -ne 0 ] && nef_fatal "git push failed with status $?"
+    fi
+
+    # lxc-ls --running "^${guest}\$"
+done
+
+# git show-ref --heads | grep " refs/heads/${GITTED_GIT_BRANCH}/"
+# git show-refs
+# [ -z "$METAGITTED_BRANCH" ] && nef_fatal "missing variable: METAGITTED_BRANCH"
+
+# state_ref=$(gitted_state_ref_name $METAGITTED_BRANCH)
+# state_commit=$(git show-ref -s $state_ref)
+# state_tree=
+# if [ -n "$state_commit" ]; then
+#     state_tree="$(git ls-tree $state_ref)"
+# fi
+
+# if [ "$state_tree" != "$(git ls-tree $gitted_new_commit)" ]; then
+
+#     nef_log "Git ref $METAGITTED_BRANCH has changed. Forwarding to container..."
+
+#     (
+
+#         echo
+
+#     ) || nef_fatal "sub-command failed"
+
+
+#     nef_log "$METAGITTED_BRANCH data has been imported and applied."
+#     git update-ref -m "import $METAGITTED_BRANCH data from $gitted_new_commit" $state_ref $gitted_new_commit
+
+# else
+#     nef_log "No change for branch: $METAGITTED_BRANCH"
+# fi
