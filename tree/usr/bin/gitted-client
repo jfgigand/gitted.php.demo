@@ -108,7 +108,7 @@ gitted_command_handle-remote-protocol() {
 
     nef_log "Forwarding command '$_command' to gitted in container '$_name'..."
     lxc-attach --clear-env -n $_name -- gitted git-remote-command $_command
-    local _ip=$(lxc-info -n $_name -i)
+    local _ip=$(lxc-info -H -n $_name -i)
     nef_log "Container IP address: $_ip"
 }
 
@@ -159,7 +159,7 @@ gitted_command_refs() {
         for _name in "${_argv[@]}"; do
             # gitted_ensure_container_running "$_name"
 
-            state=$(lxc-info -sHn $_name)
+            state=$(gitted_lxc_state $_name)
             if [ "$state" = RUNNING ]; then
                 lxc-attach --clear-env -n $_name -- gitted git show-ref | nef_log_pipe "${_name}:"
             else
@@ -189,7 +189,7 @@ gitted_command_remote-git() {
     local _name="${_argv[0]}"
     unset _argv[0]
 
-    state=$(lxc-info -sHn $_name)
+    state=$(gitted_lxc_state $_name)
     [ "$state" != RUNNING ] && nef_fatal "${_name}: container '${_name}' is ${state} (must be running)"
     nef_log "Running 'gitted git ${_argv[@]}' in container ${_name}:"
     lxc-attach --clear-env -n $_name -- gitted git -- ${_argv[@]} | nef_log_pipe "${_name}:"
@@ -293,11 +293,11 @@ gitted_list_gitted_remotes() {
 # usage: gitted_ensure_container_running <name>
 gitted_ensure_container_running() {
     _name="$1"
-    state=$(lxc-info -sHn $_name | head -n 1)
+    state=$(gitted_lxc_state $_name)
 
     nef_log "Container '$_name' is '$state'"
 
-    if [ -z "$state" ]; then
+    if [ $state = MISSING ]; then
         # [ -d "$engine_dir" ] || nef_fatal "container cannot be created as engine dir is not available: $engine_dir"
         nef_log "LXC container '$_name' does not exist. Creating..."
         lxc-create -n $_name -t download -- -d debian -r wheezy -a amd64 >&2 \
@@ -328,12 +328,12 @@ gitted_ensure_container_running() {
         sleep 3
 
 
-        state=$(lxc-info -sHn $_name | head -n 1)
+        state=$(gitted_lxc_state $_name)
         [ $state = RUNNING ] || nef_fatal "lxc-start failed; HINT: if you have just installed LXC, just reboot your system and retry..."
 
         network_ready=
         while [ "$network_ready" != ok ]; do
-            ip=$(lxc-info -n $_name -i)
+            ip=$(lxc-info -i -H -n $_name)
             if [ "$ip" = "" ]; then
                 nef_log "Waiting for the network..."
                 sleep 3
@@ -373,6 +373,12 @@ gitted_container_apply_customs() {
     fi
 
     # TODO: set GIT config for user.name and user.email
+}
+
+gitted_lxc_state() {
+    state=$(lxc-info -sHn $1 | head -n 1)
+    [ -z "$state" ] && state=MISSING
+    echo $state
 }
 
 ######################################################################
