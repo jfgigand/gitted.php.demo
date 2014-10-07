@@ -62,7 +62,7 @@ if [ -d $GITTED_WORKING_TREE/.git ]; then
             if [ $(git ls-tree HEAD $GITTED_DATA_PATH | wc -l) -ne 0 ]; then
                 op=merge
                 # --rejoin should avoid unresolved conflicts in some cases
-                nef_cmd --log-prefix git-subtree-split -- git subtree split -P $GITTED_DATA_PATH --rejoin -b $temp_branch
+                nef_cmd --log-prefix git-subtree-split -- git subtree split -P $GITTED_DATA_PATH -b $temp_branch
             fi
             # nef_cmd --log-prefix git-fetch -- git fetch $GITTED_WORKING_TREE master
             nef_log "Executing: git fetch $GITTED_WORKING_TREE master"
