@@ -61,6 +61,7 @@ if [ -d $GITTED_WORKING_TREE/.git ]; then
             op=add
             if [ $(git ls-tree HEAD $GITTED_DATA_PATH | wc -l) -ne 0 ]; then
                 op=merge
+                # --rejoin should avoid unresolved conflicts in some cases
                 nef_cmd --log-prefix git-subtree-split -- git subtree split -P $GITTED_DATA_PATH --rejoin -b $temp_branch
             fi
             # nef_cmd --log-prefix git-fetch -- git fetch $GITTED_WORKING_TREE master
@@ -85,7 +86,7 @@ if [ -d $GITTED_WORKING_TREE/.git ]; then
             cd $local_git_dir
             message="update after subtree merge of: $GITTED_WORKING_TREE"
             nef_log "updating: refs/heads/$GITTED_GIT_BRANCH"
-            git update-ref -m "$message" $state_ref refs/heads/$GITTED_GIT_BRANCH $gitted_last_commit
+            git update-ref -m "$message" $state_ref refs/heads/$GITTED_GIT_BRANCH
 
         else
             nef_log "No change committed in $GITTED_WORKING_TREE in branch master"
