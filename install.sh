@@ -11,9 +11,11 @@ grep -q "^$hostname " /etc/hosts \
 
 # because the sources.list installed by lxc download template doesn't work well
 _old_content="$(cat /etc/apt/sources.list)"
-if grep -vq "deb http://ftp.debian.org/debian/" /etc/apt/sources.list; then
-    echo "Fixing packages..."
-    echo "deb http://ftp.debian.org/debian/ wheezy main contrib" >/etc/apt/sources.list
+if grep -q debian /etc/apt/sources.list; then
+    if grep -vq "deb http://ftp.debian.org/debian/" /etc/apt/sources.list; then
+        echo "Fixing packages..."
+        echo "deb http://ftp.debian.org/debian/ wheezy main contrib" >/etc/apt/sources.list
+    fi
 fi
 
 apt-cache show git >/dev/null 2>&1 \
