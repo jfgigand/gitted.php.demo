@@ -299,13 +299,23 @@ gitted_ensure_container_running() {
 
     if [ $state = MISSING ]; then
         # [ -d "$engine_dir" ] || nef_fatal "container cannot be created as engine dir is not available: $engine_dir"
-        nef_log "LXC container '$_name' does not exist. Creating..."
-        lxc-create -n $_name -t download -- -d debian -r wheezy -a amd64 >&2 \
+        type_uuid=$(git ls-tree $gitted_executive_treeish sysconf/type | awk '{ print $3 }')
+        local distrib=debian
+        local release=wheezy
+
+        if [ -n "$type_uuid" ]; then
+            local type=$(git cat-file -p $type_uuid | head -n 1)
+            distrib=$(echo $type | cut -d' ' -f1)
+            release=$(echo $type | cut -d' ' -f2)
+        fi
+
+        nef_log "LXC container '$_name' does not exist. Creating one with distrib '$distrib', release '$release'..."
+        lxc-create -n $_name -t download -- -d $distrib -r $release -a amd64 >&2 \
             || nef_fatal "lxc-create failed"
         state=STOPPED
 
         if [ $(id -u) -ne 0 ]; then
-            # fix hwaddr to avoid redundant 00:16:3e:ff:ff:ff
+            # fix hwaddr to avoid redundant 00:16:3e:ff:ff:ff (leading to IP conflict)
             # local a=$(printf "%x"
             local a=$((RANDOM % 256))
             local b=$((RANDOM % 256))
