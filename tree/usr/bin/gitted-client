@@ -302,15 +302,19 @@ gitted_ensure_container_running() {
         type_uuid=$(git ls-tree $gitted_executive_treeish sysconf/type | awk '{ print $3 }')
         local distrib=debian
         local release=wheezy
-
+        local options=
         if [ -n "$type_uuid" ]; then
             local type=$(git cat-file -p $type_uuid | head -n 1)
             distrib=$(echo $type | cut -d' ' -f1)
             release=$(echo $type | cut -d' ' -f2)
+
+        fi
+        if [ "$release" = "jessie" ]
+            # https://www.mail-archive.com/lxc-users@lists.linuxcontainers.org/msg01894.html
         fi
 
         nef_log "LXC container '$_name' does not exist. Creating one with distrib '$distrib', release '$release'..."
-        lxc-create -n $_name -t download -- -d $distrib -r $release -a amd64 >&2 \
+        lxc-create -n $_name -t download -- -d $distrib -r $release -a amd64 $options >&2 \
             || nef_fatal "lxc-create failed"
         state=STOPPED
 
