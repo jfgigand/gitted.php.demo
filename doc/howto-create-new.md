@@ -82,7 +82,28 @@ lxc-destroy -f -n test-vm
   that need to run to setup the system, for example ```apt-get
   install``` commands, or generating config files
 
+* To run the system again:
+```
+sysconf/gitted-client register    # because sysconf has changed
+git push test-vm master
+```
+
 ## Update your README with how to run it
 
 * See the [Example README](example-of-readme.md) and update your own
   with the instructions on how to run the service.
+
+## Syncronizing Sysconf work with git push/pull
+
+(to work on Sysconf and save/propagate the changes without re-building the container)
+
+* To get sysconf synchronised after the ```sysconf/``` directory from your repository, create ```sysconf/actual/tree/etc/gitted/sync/master.import``` with executable permissions and this content:
+```
+#!/bin/bash
+GITTED_DATA_PATH=sysconf /usr/share/gitted/import/sysconf
+``` 
+* The other way: if you want to work your ```/sysconf``` from within the container and synchronise it to your ```sysconf/``` directory in your Git repository, create ```sysconf/actual/tree/etc/gitted/sync/master.export``` with executable permissions and the content:
+```
+#!/bin/bash
+GITTED_DATA_PATH=sysconf /usr/share/gitted/export/sysconf
+```
