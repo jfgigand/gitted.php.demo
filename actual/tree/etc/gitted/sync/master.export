@@ -4,3 +4,8 @@ source /etc/gitted/sync/defs
 
 GITTED_DATA_PATH=sysconf /usr/share/gitted/export/sysconf
 GITTED_DATA_PATH=mysql /usr/share/gitted/export/mysql
+GITTED_DATA_PATH=www \
+    GITTED_WORKING_TREE=$GITTED_WWW_PATH \
+    GITTED_AUTO_COMMIT=no \
+    GITTED_AUTO_ADD=no \
+    /usr/share/gitted/export/git-subtree

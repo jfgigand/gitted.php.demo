@@ -1,3 +1,4 @@
 # definitions for gitted/sync "actual"  -*- shell-script -*-
 
 export GITTED_MYSQL_DATABASE=demo
+export GITTED_WWW_PATH=/var/lib/demo
