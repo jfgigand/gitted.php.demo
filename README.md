@@ -6,7 +6,7 @@ system. See [Gitted](https://github.com/geonef/sysconf.gitted) for
 more information.
 
 ```
-git clone https://github.com/jfgigand/gitted.demo.php.git && cd demo
+git clone https://github.com/jfgigand/gitted.php.demo.git && cd demo
 sysconf/gitted-client register && sysconf/gitted-client add demo
 git push demo master
 ```
