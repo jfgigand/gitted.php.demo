@@ -21,7 +21,7 @@ mysql_run() {
 # Install required Debian packages
 _packages=
 _packages="$_packages nginx mysql-server"
-_packages="$_packages php5-fpm php5-mysql"      # for PHP back-end
+_packages="$_packages php5-fpm php5-cli php5-mysql"      # for PHP back-end
 sysconf_require_packages $_packages
 
 # Fix Nginx
